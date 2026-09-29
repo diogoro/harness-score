@@ -22,8 +22,8 @@ input (`maturity` default).
 
 | Scope | Meaning | What is scanned |
 |---|---|---|
-| `repo` | Always on | The directory you pass to `harness-score` (default `.`) |
-| `user` | Opt-in | Allowlisted user-level paths mapped to repo-relative shapes: `~/.cursor/*`, `~/.claude/*`, `~/.codeium/windsurf/*` (Windsurf global rules alias), `~/Documents/Cline/Rules` → `.clinerules/`, `~/.continue/{rules,prompts}`, `~/.agents/*`, `~/.zed/commands`, `~/.config/opencode/agents`, global MCP/hooks configs, etc. See [multi-harness — user-scope by tool](./multi-harness#user-scope-by-tool). **Not included:** Copilot global (repo-only), Continue inline rules in `config.yaml`, IDE-only Cursor User Rules. |
+| `repo` | Always on | The directory you pass to `harness-score` (default `.`). When the scan root is a Claude Code or Cursor **plugin repository** (`.claude-plugin/plugin.json` or `.cursor-plugin/plugin.json` at the root), default plugin `skills/`, `commands/`, `agents/`, and `hooks/hooks.json` count like `.claude/...` / `.cursor/...`. |
+| `user` | Opt-in | Allowlisted user-level paths mapped to repo-relative shapes: `~/.cursor/*`, `~/.claude/*`, user-scoped Claude Code plugins from `~/.claude/plugins/installed_plugins.json`, `~/.codeium/windsurf/*` (Windsurf global rules alias), `~/Documents/Cline/Rules` → `.clinerules/`, `~/.continue/{rules,prompts}`, `~/.agents/*`, `~/.zed/commands`, `~/.config/opencode/agents`, global MCP/hooks configs, etc. See [multi-harness — user-scope by tool](./multi-harness#user-scope-by-tool). **Not included:** Copilot global (repo-only), Continue inline rules in `config.yaml`, IDE-only Cursor User Rules, Cursor user plugin cache (v1). |
 | `system` | Opt-in | Reserved for validated system-wide installs (minimal in v1) |
 | `extraRoots` | Opt-in | Additional directories (relative or absolute) whose tree mirrors harness layout — e.g. a shared team harness checkout |
 

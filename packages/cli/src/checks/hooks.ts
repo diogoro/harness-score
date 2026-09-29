@@ -15,7 +15,7 @@ export const hookChecks: Check[] = [
         return {
           passed: false,
           evidence:
-            'No .cursor/hooks.json, .claude/settings.json hooks key, .devin/hooks.v1.json, or .devin/config.json hooks key found.',
+            'No .cursor/hooks.json, .claude/settings.json hooks key, plugin hooks/hooks.json, .devin/hooks.v1.json, or .devin/config.json hooks key found.',
         };
       }
       if (!hooks.hasEventMap) {

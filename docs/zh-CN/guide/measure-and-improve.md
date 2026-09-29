@@ -459,7 +459,7 @@ context 文件 — 按设计即通过。
 ### Skills & Commands (17 pts)
 
 #### SKL-01 · At least one skill — 4 pts {#skl-01}
-`.cursor/skills/<name>/`、`.claude/skills/<name>/` 或 `.agents/skills/<name>/` 下存在 `SKILL.md`。
+`.cursor/skills/<name>/`、`.claude/skills/<name>/`、`.agents/skills/<name>/` 下存在 `SKILL.md`；或当扫描根为 Claude Code / Cursor plugin 仓库时，在默认 plugin `skills/<name>/` 下（扫描根存在 `.claude-plugin/plugin.json` 或 `.cursor-plugin/plugin.json`）。
 **修复：** 将最常重复的流程（部署、发布、迁移）
 封装为 skill — [第 3 章](./guides-feedforward#skills-the-procedural-layer)。
 
@@ -470,7 +470,7 @@ context 文件 — 按设计即通过。
 
 #### SKL-03 · Explicit workflows/commands defined — 3 pts {#skl-03}
 存在 command 或 workflow 文件（`.cursor/commands/`、`.windsurf/workflows/`、
-`.claude/commands/`、`.continue/prompts/`、`.zed/commands/`、`.agents/workflows/`）。
+`.claude/commands/`、`.continue/prompts/`、`.zed/commands/`、`.agents/workflows/`，或扫描根下的 plugin `commands/`）。
 **修复：** 将你有意触发的 workflow（`/review`、`/release`）
 编码为 command/workflow 文件。
 
@@ -479,7 +479,7 @@ description ≥40 字符。
 **修复：** 将 description 写成触发条件 — 「当用户要求部署或发布时使用；涵盖打 tag、流水线、回滚、冒烟测试。」
 
 #### AGT-01 · Custom subagent defined — 3 pts {#agt-01}
-`.cursor/agents/`、`.claude/agents/` 或 `.opencode/agents/` 下存在 subagent 文件。
+`.cursor/agents/`、`.claude/agents/`、`.opencode/agents/` 或扫描根下的 plugin `agents/` 下存在 subagent 文件。
 **修复：** 为主智能体应委派的任务（规划、审查、发布）封装专用 subagent — 见
 [Subagents](./cursor-harness-surface#subagents-purpose-built-delegates)
 （第 2 章）。
@@ -494,11 +494,13 @@ description ≥40 字符。
 Harness 工件既可从仓库根目录按规范路径识别，也可在工具目录本身作为扫描根目录时识别。
 例如，扫描 `.claude` 时，物理路径 `settings.json`、`hooks/`、`skills/` 和 `agents/`
 会被识别为对应的 `.claude/...` 路径；扫描 `.devin` 时，同样识别 `hooks.v1.json`、
-`config.json`（`hooks` 键）、`hooks/` 和 `skills/`。其他名称的通用根目录不会应用此规则。证据始终使用
+`config.json`（`hooks` 键）、`hooks/` 和 `skills/`。扫描 plugin 仓库根（扫描根存在
+`.claude-plugin/plugin.json` 或 `.cursor-plugin/plugin.json`）时，默认识别 `skills/`、`commands/`、
+`agents/` 与 `hooks/hooks.json` 为对应工具的规范路径；树内其他位置的嵌套 plugin manifest 不会启用此别名。其他名称的通用根目录不会应用此规则。证据始终使用
 实际读取的物理路径。
 
 #### HKS-01 · Hooks configuration present and valid JSON — 4 pts {#hks-01}
-`.cursor/hooks.json`、`.claude/settings.json`（`hooks` 键）、`.devin/hooks.v1.json`（独立
+`.cursor/hooks.json`、`.claude/settings.json`（`hooks` 键）、扫描根下的 plugin `hooks/hooks.json`、`.devin/hooks.v1.json`（独立
 event 映射）或 `.devin/config.json`（`hooks` 键）存在且可解析为 JSON。当存在多个配置时，优先选择有效且非空的配置；再依次按原生根目录深度、事件数量
 和路径字典序进行确定性选择。gitignore 的 `.devin/config.local.json` 不会被扫描。
 **修复：** 创建 hooks 配置，并按

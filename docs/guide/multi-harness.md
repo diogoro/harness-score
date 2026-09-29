@@ -101,7 +101,7 @@ full list.
 | Tool | User-scope paths (examples) | Notes |
 |---|---|---|
 | **Cursor** | `~/.cursor/{skills,commands,agents,rules}`, `~/.cursor/mcp.json` | IDE-only User Rules still invisible |
-| **Claude Code** | `~/.claude/{skills,commands,agents}`, `~/.claude/settings.json`, `~/.mcp.json` | |
+| **Claude Code** | `~/.claude/{skills,commands,agents}`, `~/.claude/settings.json`, `~/.mcp.json`, user-scoped plugins from `~/.claude/plugins/installed_plugins.json` | User plugins count toward effective score only |
 | **Windsurf** | `~/.codeium/windsurf/memories/global_rules.md` → `.windsurf/rules/…`, `~/.windsurf/{rules,workflows}/`, MCP alias | Global rules live under Codeium, not `.windsurf/` |
 | **Cline** | `~/Documents/Cline/Rules/*.md` → `.clinerules/…` | Fallback: `~/Cline/Rules` |
 | **Continue** | `~/.continue/{rules,prompts}/` | Inline rules in `config.yaml` not parsed (v1) |

@@ -92,7 +92,7 @@ Windsurf 没有扫描器可识别的 hooks 系统 — 但 hooks 只是六个维�
 | 工具 | user scope 路径（示例） | 说明 |
 |---|---|---|
 | **Cursor** | `~/.cursor/{skills,commands,agents,rules}`、`~/.cursor/mcp.json` | 仅 UI 中的 User Rules 仍不可见 |
-| **Claude Code** | `~/.claude/{skills,commands,agents}`、`~/.claude/settings.json`、`~/.mcp.json` | |
+| **Claude Code** | `~/.claude/{skills,commands,agents}`、`~/.claude/settings.json`、`~/.mcp.json`、来自 `~/.claude/plugins/installed_plugins.json` 的 user-scoped plugins | User plugins count toward effective score only |
 | **Windsurf** | `~/.codeium/windsurf/memories/global_rules.md` → `.windsurf/rules/…`、`~/.windsurf/{rules,workflows}/`、MCP 别名 | 全局 rules 在 Codeium 下 |
 | **Cline** | `~/Documents/Cline/Rules/*.md` → `.clinerules/…` | 回退：`~/Cline/Rules` |
 | **Continue** | `~/.continue/{rules,prompts}/` | `config.yaml` 内联 rules 未解析（v1） |

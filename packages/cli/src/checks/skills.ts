@@ -21,7 +21,7 @@ export const skillChecks: Check[] = [
         : {
             passed: false,
             evidence:
-              'No SKILL.md under .cursor/skills/, .claude/skills/, .devin/skills/, or .agents/skills/.',
+              'No SKILL.md under .cursor/skills/, .claude/skills/, .devin/skills/, .agents/skills/, or a plugin skills/ directory at the scan root.',
           };
     },
   },
@@ -61,7 +61,7 @@ export const skillChecks: Check[] = [
         : {
             passed: false,
             evidence:
-              'No command/workflow files found (.cursor/commands, .windsurf/workflows, .claude/commands, .continue/prompts, …).',
+              'No command/workflow files found (.cursor/commands, .windsurf/workflows, .claude/commands, .continue/prompts, plugin commands/, …).',
           };
     },
   },
