@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import type { ScanContext } from '../types.js';
 import { compareLexically } from '../util.js';
+import { pluginLayoutAtScanRoot, pluginLayoutToolId, pluginPhysicalToCanonical } from './plugins.js';
 
 /** Stable tool identifiers surfaced in scan reports. */
 export type ToolId =
@@ -78,6 +79,16 @@ export function matchPathSpec(ctx: ScanContext, spec: PathSpec): PathSpecMatch[]
     for (const file of ctx.files) {
       const canonicalPath = `${spec.nativeRoot}/${file}`;
       if (!spec.pathRegex.test(canonicalPath)) continue;
+      matches.set(file, { path: file, canonicalPath, nativeDepth: 0 });
+    }
+  }
+
+  const pluginLayout = pluginLayoutAtScanRoot(ctx);
+  if (pluginLayout && spec.toolId === pluginLayoutToolId(pluginLayout)) {
+    const hasSkillsDir = ctx.files.some((file) => file === 'skills' || file.startsWith('skills/'));
+    for (const file of ctx.files) {
+      const canonicalPath = pluginPhysicalToCanonical(file, pluginLayout, hasSkillsDir);
+      if (!canonicalPath || !spec.pathRegex.test(canonicalPath)) continue;
       matches.set(file, { path: file, canonicalPath, nativeDepth: 0 });
     }
   }

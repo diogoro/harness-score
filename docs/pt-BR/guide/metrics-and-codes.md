@@ -22,8 +22,8 @@ da Action (`maturity` por padrão).
 
 | Escopo | Significado | O que é escaneado |
 |---|---|---|
-| `repo` | Sempre ativo | O diretório passado ao `harness-score` (padrão `.`) |
-| `user` | Opt-in | Caminhos allowlisted mapeados para formas repo-relative: `~/.cursor/*`, `~/.claude/*`, `~/.codeium/windsurf/*` (alias Windsurf), `~/Documents/Cline/Rules` → `.clinerules/`, `~/.continue/{rules,prompts}`, `~/.agents/*`, `~/.zed/commands`, `~/.config/opencode/agents`, etc. Ver [multi-harness — user scope por ferramenta](./multi-harness#user-scope-by-tool). **Não inclui:** Copilot global (só repo), regras inline do Continue em `config.yaml`, User Rules do Cursor só na UI. |
+| `repo` | Sempre ativo | O diretório passado ao `harness-score` (padrão `.`). Quando a raiz do scan é um **repositório plugin** Claude Code ou Cursor (`.claude-plugin/plugin.json` ou `.cursor-plugin/plugin.json` na raiz), `skills/`, `commands/`, `agents/` e `hooks/hooks.json` default contam como `.claude/...` / `.cursor/...`. |
+| `user` | Opt-in | Caminhos allowlisted mapeados para formas repo-relative: `~/.cursor/*`, `~/.claude/*`, plugins Claude Code user-scoped em `~/.claude/plugins/installed_plugins.json`, `~/.codeium/windsurf/*` (alias Windsurf), `~/Documents/Cline/Rules` → `.clinerules/`, `~/.continue/{rules,prompts}`, `~/.agents/*`, `~/.zed/commands`, `~/.config/opencode/agents`, etc. Ver [multi-harness — user scope por ferramenta](./multi-harness#user-scope-by-tool). **Não inclui:** Copilot global (só repo), regras inline do Continue em `config.yaml`, User Rules do Cursor só na UI, cache de plugins Cursor no usuário (v1). |
 | `system` | Opt-in | Reservado para instalações validadas em nível de sistema (mínimo na v1) |
 | `extraRoots` | Opt-in | Diretórios adicionais (relativos ou absolutos) cuja árvore espelha o layout do harness — ex.: checkout compartilhado de harness do time |
 

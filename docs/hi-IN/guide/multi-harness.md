@@ -93,7 +93,7 @@ Cursor User Rules जो केवल IDE settings UI में हैं, द�
 | Tool | User-scope paths (उदाहरण) | Notes |
 |---|---|---|
 | **Cursor** | `~/.cursor/{skills,commands,agents,rules}`, `~/.cursor/mcp.json` | UI-only User Rules invisible |
-| **Claude Code** | `~/.claude/{skills,commands,agents}`, `~/.claude/settings.json`, `~/.mcp.json` | |
+| **Claude Code** | `~/.claude/{skills,commands,agents}`, `~/.claude/settings.json`, `~/.mcp.json`, user-scoped plugins from `~/.claude/plugins/installed_plugins.json` | User plugins count toward effective score only |
 | **Windsurf** | `~/.codeium/windsurf/memories/global_rules.md` → `.windsurf/rules/…`, `~/.windsurf/{rules,workflows}/`, MCP alias | Global rules Codeium के अंतर्गत |
 | **Cline** | `~/Documents/Cline/Rules/*.md` → `.clinerules/…` | Fallback: `~/Cline/Rules` |
 | **Continue** | `~/.continue/{rules,prompts}/` | `config.yaml` inline rules parse नहीं (v1) |

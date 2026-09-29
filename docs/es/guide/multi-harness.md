@@ -100,7 +100,7 @@ del registry para que los checks se comporten como archivos del repo.
 | Herramienta | Rutas user-scope (ejemplos) | Notas |
 |---|---|---|
 | **Cursor** | `~/.cursor/{skills,commands,agents,rules}`, `~/.cursor/mcp.json` | User Rules solo en UI siguen invisibles |
-| **Claude Code** | `~/.claude/{skills,commands,agents}`, `~/.claude/settings.json`, `~/.mcp.json` | |
+| **Claude Code** | `~/.claude/{skills,commands,agents}`, `~/.claude/settings.json`, `~/.mcp.json`, user-scoped plugins from `~/.claude/plugins/installed_plugins.json` | User plugins count toward effective score only |
 | **Windsurf** | `~/.codeium/windsurf/memories/global_rules.md` → `.windsurf/rules/…`, `~/.windsurf/{rules,workflows}/`, alias MCP | Reglas globales bajo Codeium |
 | **Cline** | `~/Documents/Cline/Rules/*.md` → `.clinerules/…` | Fallback: `~/Cline/Rules` |
 | **Continue** | `~/.continue/{rules,prompts}/` | Reglas inline en `config.yaml` no parseadas (v1) |

@@ -495,7 +495,7 @@ The deprecated single-file format is absent (or modern scoped rules also exist).
 ### Skills & Commands (17 pts)
 
 #### SKL-01 · At least one skill — 4 pts {#skl-01}
-A `SKILL.md` under `.cursor/skills/<name>/`, `.claude/skills/<name>/`, or `.agents/skills/<name>/`.
+A `SKILL.md` under `.cursor/skills/<name>/`, `.claude/skills/<name>/`, `.agents/skills/<name>/`, or — when the scan root is a Claude Code or Cursor plugin repository — under default plugin `skills/<name>/` (manifest at `.claude-plugin/plugin.json` or `.cursor-plugin/plugin.json` at the scan root).
 **Correção:** package your most repeated procedure (deploy, release, migration)
 as a skill — [capítulo 3](./guides-feedforward#skills-the-procedural-layer).
 
@@ -506,7 +506,7 @@ alone; without them the skill is invisible.
 
 #### SKL-03 · Explicit workflows/commands defined — 3 pts {#skl-03}
 Command or workflow files (`.cursor/commands/`, `.windsurf/workflows/`,
-`.claude/commands/`, `.continue/prompts/`, `.zed/commands/`, `.agents/workflows/`).
+`.claude/commands/`, `.continue/prompts/`, `.zed/commands/`, `.agents/workflows/`, or plugin `commands/` at the scan root).
 **Correção:** encode workflows you trigger deliberately (`/review`, `/release`)
 as command/workflow files.
 
@@ -516,7 +516,7 @@ Descriptions ≥40 characters.
 to deploy or release; covers tagging, pipeline, rollback, smoke tests."
 
 #### AGT-01 · Custom subagent defined — 3 pts {#agt-01}
-A subagent file under `.cursor/agents/`, `.claude/agents/`, or `.opencode/agents/`.
+A subagent file under `.cursor/agents/`, `.claude/agents/`, `.opencode/agents/`, or plugin `agents/` at the scan root.
 **Correção:** package a purpose-built subagent for a job the primary agent should
 delegate (planning, review, release) — see
 [Subagents](./cursor-harness-surface#subagents-purpose-built-delegates)
@@ -533,11 +533,15 @@ Os artefatos do harness são reconhecidos tanto a partir da raiz do repositório
 canônico, quanto quando o próprio diretório da ferramenta é a raiz do scan. Por exemplo, ao
 escanear `.claude`, os caminhos físicos `settings.json`, `hooks/`, `skills/` e `agents/` são
 reconhecidos como seus equivalentes `.claude/...`; ao escanear `.devin`, `hooks.v1.json`,
-`config.json` (chave `hooks`), `hooks/` e `skills/` também são reconhecidos. Raízes genéricas com
-outro nome não recebem esse tratamento. A evidência sempre usa o caminho físico que foi lido.
+`config.json` (chave `hooks`), `hooks/` e `skills/` também são reconhecidos. Escanear a raiz de um
+repositório plugin (`.claude-plugin/plugin.json` ou `.cursor-plugin/plugin.json` na raiz do scan)
+reconhece `skills/`, `commands/`, `agents/` e `hooks/hooks.json` default como equivalentes canônicos
+da ferramenta. Manifestos plugin aninhados em outras pastas não ativam esse alias. Raízes genéricas
+com outro nome não recebem esse tratamento. A evidência sempre usa o caminho físico que foi lido.
 
 #### HKS-01 · Hooks configuration present and valid JSON — 4 pts {#hks-01}
-`.cursor/hooks.json`, `.claude/settings.json` (chave `hooks`), `.devin/hooks.v1.json` (mapa
+`.cursor/hooks.json`, `.claude/settings.json` (chave `hooks`), plugin `hooks/hooks.json` na raiz do
+scan, `.devin/hooks.v1.json` (mapa
 standalone de eventos) ou `.devin/config.json` (chave `hooks`) existe e parseia como JSON. Quando há
 várias configurações, uma configuração válida e não vazia vence; profundidade da raiz nativa,
 quantidade de eventos e caminho lexical são os desempates determinísticos. `.devin/config.local.json`

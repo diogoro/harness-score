@@ -467,7 +467,7 @@ deprecated single-file फ़ॉर्मेट absent है (या modern sco
 ### Skills & Commands (17 pts)
 
 #### SKL-01 · At least one skill — 4 pts {#skl-01}
-`.cursor/skills/<name>/`, `.claude/skills/<name>/`, या `.agents/skills/<name>/` के अंतर्गत `SKILL.md`।
+`.cursor/skills/<name>/`, `.claude/skills/<name>/`, `.agents/skills/<name>/` के अंतर्गत `SKILL.md`; या जब scan root Claude Code / Cursor plugin repository हो — default plugin `skills/<name>/` के अंतर्गत (scan root पर `.claude-plugin/plugin.json` या `.cursor-plugin/plugin.json`)।
 **सुधार:** अपनी सबसे बार-बार दोहराई procedure (deploy, release, migration)
 को skill के रूप में package करें — [अध्याय 3](./guides-feedforward#skills-the-procedural-layer)।
 
@@ -478,7 +478,7 @@ deprecated single-file फ़ॉर्मेट absent है (या modern sco
 
 #### SKL-03 · Explicit workflows/commands defined — 3 pts {#skl-03}
 Command या workflow फ़ाइलें (`.cursor/commands/`, `.windsurf/workflows/`,
-`.claude/commands/`, `.continue/prompts/`, `.zed/commands/`, `.agents/workflows/`)।
+`.claude/commands/`, `.continue/prompts/`, `.zed/commands/`, `.agents/workflows/`, या scan root पर plugin `commands/`)।
 **सुधार:** workflows जिन्हें आप जानबूझकर trigger करते हैं (`/review`, `/release`)
 को command/workflow फ़ाइलों के रूप में encode करें।
 
@@ -488,7 +488,7 @@ Descriptions ≥40 characters।
 to deploy or release; covers tagging, pipeline, rollback, smoke tests.»
 
 #### AGT-01 · Custom subagent defined — 3 pts {#agt-01}
-`.cursor/agents/`, `.claude/agents/`, या `.opencode/agents/` के अंतर्गत subagent फ़ाइल।
+`.cursor/agents/`, `.claude/agents/`, `.opencode/agents/`, या scan root पर plugin `agents/` के अंतर्गत subagent फ़ाइल।
 **सुधार:** primary agent को delegate करने वाले काम (planning, review, release) के लिए purpose-built subagent package करें — देखें
 [Subagents](./cursor-harness-surface#subagents-purpose-built-delegates)
 अध्याय 2 में।
@@ -504,11 +504,13 @@ Harness artifacts repository root से canonical path द्वारा औ�
 होने पर भी पहचाने जाते हैं। उदाहरण के लिए, `.claude` को scan करने पर physical paths
 `settings.json`, `hooks/`, `skills/`, और `agents/` को उनके `.claude/...` equivalents के रूप में
 पहचाना जाता है; `.devin` scan करने पर `hooks.v1.json`, `config.json` (`hooks` key), `hooks/`, और
-`skills/` भी पहचाने जाते हैं। किसी अन्य नाम वाली generic root पर यह नियम लागू नहीं होता। Evidence हमेशा पढ़े गए
+`skills/` भी पहचाने जाते हैं। Plugin repository root scan करने पर (scan root पर `.claude-plugin/plugin.json`
+या `.cursor-plugin/plugin.json`) default `skills/`, `commands/`, `agents/`, और `hooks/hooks.json` को tool-canonical
+equivalents के रूप में पहचाना जाता है; tree में कहीं और nested plugin manifest इस aliasing को enable नहीं करते। किसी अन्य नाम वाली generic root पर यह नियम लागू नहीं होता। Evidence हमेशा पढ़े गए
 physical path का उपयोग करता है।
 
 #### HKS-01 · Hooks configuration present and valid JSON — 4 pts {#hks-01}
-`.cursor/hooks.json`, `.claude/settings.json` (`hooks` key), `.devin/hooks.v1.json` (standalone
+`.cursor/hooks.json`, `.claude/settings.json` (`hooks` key), scan root पर plugin `hooks/hooks.json`, `.devin/hooks.v1.json` (standalone
 event map), या `.devin/config.json` (`hooks` key) मौजूद है और JSON के रूप में parse होता है। कई configs होने पर valid non-empty config जीतता है; native-root depth,
 event count, और lexical path deterministic tie-breakers हैं। Gitignored `.devin/config.local.json` scan नहीं होता।
 **सुधार:** hooks config बनाएँ और
