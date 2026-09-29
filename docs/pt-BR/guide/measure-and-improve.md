@@ -585,22 +585,25 @@ passam sem scripts locais aplicáveis.
 ### Sensors & Feedback (20 pts)
 
 #### SNS-01 · Test runner configured — 6 pts {#sns-01}
-A real test script/config (vitest, jest, pytest, go test, cargo test…).
+A real test script/config (vitest, jest, pytest, go test, cargo test,
+phpunit.xml, pest.php, …) or a declared Composer test package
+(`phpunit/phpunit`, `pestphp/pest`, …).
 **Correção:** wire up the runner with one obvious entry point and document it in
 AGENTS.md — tests are how the agent verifies its own work.
 
 #### SNS-02 · Linter configured — 5 pts {#sns-02}
-eslint/biome, ruff, golangci-lint, rubocop, or equivalent.
+eslint/biome, ruff, golangci-lint, rubocop, phpcs/rector, or equivalent.
 **Correção:** every convention expressible as a lint rule stops needing prose.
 
 #### SNS-03 · Type checking in place — 4 pts {#sns-03}
-tsconfig (ideally `strict: true`), mypy/pyright, or a statically typed
-language.
+tsconfig (ideally `strict: true`), mypy/pyright, phpstan/psalm, or a
+statically typed language.
 **Correção:** the type checker is the only sensor that reviews every agent edit
 for free — [capítulo 4](./sensors-feedback#type-checking-the-free-sensor).
 
 #### SNS-04 · Formatter configured — 3 pts {#sns-04}
-prettier/biome, black/ruff-format, gofmt/rustfmt.
+prettier/biome, black/ruff-format, gofmt/rustfmt, pint, or php-cs-fixer
+(including `laravel/pint` in `composer.json` when no config file exists).
 **Correção:** formatting noise in diffs hides real mistakes from review.
 
 #### SNS-05 · Test files exist — 2 pts {#sns-05}
