@@ -10,6 +10,7 @@ export type ToolId =
   | 'continue'
   | 'copilot'
   | 'claude-code'
+  | 'devin'
   | 'codex'
   | 'opencode'
   | 'antigravity'
@@ -25,6 +26,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolId, string> = {
   continue: 'Continue',
   copilot: 'GitHub Copilot',
   'claude-code': 'Claude Code',
+  devin: 'Devin',
   codex: 'Codex',
   opencode: 'OpenCode',
   antigravity: 'Antigravity',
@@ -157,6 +159,12 @@ export const PATH_SPECS: PathSpec[] = [
     nativeRoot: '.claude',
   },
   {
+    toolId: 'devin',
+    kind: 'skills',
+    pathRegex: /(^|\/)\.devin\/skills\/[^/]+\/SKILL\.md$/,
+    nativeRoot: '.devin',
+  },
+  {
     toolId: 'codex',
     kind: 'skills',
     pathRegex: /(^|\/)\.agents\/skills\/[^/]+\/SKILL\.md$/,
@@ -245,6 +253,18 @@ export const PATH_SPECS: PathSpec[] = [
     kind: 'hooks',
     pathRegex: /(^|\/)\.claude\/settings\.json$/,
     nativeRoot: '.claude',
+  },
+  {
+    toolId: 'devin',
+    kind: 'hooks',
+    pathRegex: /(^|\/)\.devin\/hooks\.v1\.json$/,
+    nativeRoot: '.devin',
+  },
+  {
+    toolId: 'devin',
+    kind: 'hooks',
+    pathRegex: /(^|\/)\.devin\/config\.json$/,
+    nativeRoot: '.devin',
   },
 
   // MCP

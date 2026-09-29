@@ -47,7 +47,7 @@
 |---|---|---|---|
 | `context` | Context & Guides | 20 | AGENTS.md、scoped rules、README |
 | `skills` | Skills & Commands | 17 | Skills、commands/workflows、subagents |
-| `hooks` | Hooks & Guardrails | 14 | hooks.json / Claude settings hooks |
+| `hooks` | Hooks & Guardrails | 14 | Cursor、Claude Code 与 Devin 的 hooks 配置 |
 | `sensors` | Sensors & Feedback | 20 | 测试、linter、类型、formatter |
 | `ci` | CI Feedback | 14 | Pipeline、pre-commit |
 | `hygiene` | Hygiene & Safety | 23 | .gitignore、secrets、lockfile、license、MCP 卫生 |
@@ -86,7 +86,7 @@
 
 | ID | 分 | 精确分析 | 修复 |
 |---|---|---|---|
-| HKS-01 | 4 | Hooks 配置存在且可解析为 JSON | [hks-01](./measure-and-improve#hks-01) |
+| HKS-01 | 4 | 存在 Cursor、Claude Code 或 Devin 的 hooks 配置且可解析为 JSON | [hks-01](./measure-and-improve#hks-01) |
 | HKS-02 | 2 | Event 与 typed handler 结构有效；未知但有效的 event 产生 warning | [hks-02](./measure-and-improve#hks-02) |
 | HKS-03 | 4 | 注册了 gate 类 hook（shell/MCP/read/tool gate） | [hks-03](./measure-and-improve#hks-03) |
 | HKS-04 | 2 | 注册了 feedback 类 hook（post-edit/tool） | [hks-04](./measure-and-improve#hks-04) |

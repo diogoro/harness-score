@@ -28,7 +28,7 @@ wildly different results, because one has a harness that catches mistakes
 before they ship and the other has none.
 
 **Harness Score measures that harness — across any tool.** Point it at any
-repository using Cursor, Claude Code, Windsurf, Cline, Continue, or any other
+repository using Cursor, Claude Code, Devin, Windsurf, Cline, Continue, or any other
 AI coding tool, and get a maturity level (L0–L4), a 108-point breakdown across
 six dimensions, and the precise, ranked list of what to fix next — with zero
 LLM calls, zero network access, and the same result every time you run it.

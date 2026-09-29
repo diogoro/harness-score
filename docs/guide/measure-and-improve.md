@@ -536,13 +536,15 @@ alone; without them the subagent is never invoked.
 Harness artifacts are recognized both from a repository root by their canonical path and when
 the tool directory itself is the scan root. For example, scanning `.claude` recognizes the
 physical `settings.json`, `hooks/`, `skills/`, and `agents/` paths as their `.claude/...`
-equivalents. Generic roots named something else do not receive this treatment. Evidence always
-uses the physical path that was read.
+equivalents; scanning `.devin` similarly recognizes `hooks.v1.json`, `config.json` (`hooks` key),
+`hooks/`, and `skills/`. Generic roots named something else do not receive this treatment.
+Evidence always uses the physical path that was read.
 
 #### HKS-01 · Hooks configuration present and valid JSON — 4 pts {#hks-01}
-`.cursor/hooks.json` or `.claude/settings.json` (`hooks` key) exists, parses as JSON, and contains
-a hooks object. When several configs exist, a valid non-empty config wins; native-root depth,
-event count, and lexical path provide deterministic tie-breakers.
+`.cursor/hooks.json`, `.claude/settings.json` (`hooks` key), `.devin/hooks.v1.json` (standalone
+event map), or `.devin/config.json` (`hooks` key) exists and parses as JSON. When several configs
+exist, a valid non-empty config wins; native-root depth, event count, and lexical path provide
+deterministic tie-breakers. Gitignored `.devin/config.local.json` is not scanned.
 **Fix:** create hooks config and grow from the recipes in
 [chapter 5](/guide/guardrails-and-safety#gate-hooks).
 
@@ -555,27 +557,31 @@ documented Claude Code events: `SessionStart`, `Setup`, `InstructionsLoaded`, `U
 `PostToolUseFailure`, `PostToolBatch`, `PermissionDenied`, `Notification`, `SubagentStart`,
 `SubagentStop`, `TaskCreated`, `TaskCompleted`, `Stop`, `StopFailure`, `TeammateIdle`,
 `ConfigChange`, `CwdChanged`, `DirectoryAdded`, `FileChanged`, `WorktreeCreate`, `WorktreeRemove`,
-`PreCompact`, `PostCompact`, `SessionEnd`, `Elicitation`, and `ElicitationResult`.
+`PreCompact`, `PostCompact`, `SessionEnd`, `Elicitation`, and `ElicitationResult`. Devin's
+standalone map documents `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`,
+`Stop`, `PostCompaction`, `SessionStart`, and `SessionEnd` (no `version` field required).
 **Forward compatibility:** an unknown but structurally valid event keeps its points and emits an
 `unknown-hook-event` warning. Empty or malformed events still fail.
 
 #### HKS-03 · Gate hook guards risky operations — 4 pts {#hks-03}
 A gate hook registered (Cursor: `beforeShellExecution`, `beforeMCPExecution`,
-`preToolUse`, or `beforeReadFile`; Claude Code: `PreToolUse`).
+`preToolUse`, or `beforeReadFile`; Claude Code or Devin: `PreToolUse` or `PermissionRequest`).
 **Fix:** add the destructive-command deny gate from chapter 5 — prose rules
 are requests; gates are facts.
 
 #### HKS-04 · Feedback hook observes output — 2 pts {#hks-04}
 A feedback hook registered (Cursor: `afterFileEdit`, `postToolUse`, …;
-Claude Code: `PostToolUse`).
+Claude Code: `PostToolUse`; Devin: `PostToolUse` or `Stop`).
 **Fix:** format-and-lint on edit gives the agent instant feedback inside the
 session.
 
 #### HKS-05 · Hook scripts committed — 2 pts {#hks-05}
 Every repository-local path in a command executable, shell command, or `args` entry resolves to a
 committed file. Project-prefixed canonical paths such as
-`${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js` also resolve to physical `hooks/check.js` when
-`.claude` is the scan root. Valid non-command handlers pass with no applicable local scripts.
+`${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js` and `${DEVIN_PROJECT_DIR}/.devin/hooks/check.py`
+also resolve to physical hook paths under native scan roots. Devin commands using the narrow
+`os.path.join(os.environ['DEVIN_PROJECT_DIR'], …)` form are resolved without executing Python.
+Valid non-command handlers pass with no applicable local scripts.
 **Fix:** commit every referenced local script; one missing path fails HKS-05.
 
 ### Sensors & Feedback (20 pts)

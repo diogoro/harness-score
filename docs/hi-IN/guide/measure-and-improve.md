@@ -503,13 +503,14 @@ to deploy or release; covers tagging, pipeline, rollback, smoke tests.»
 Harness artifacts repository root से canonical path द्वारा और tool directory के स्वयं scan root
 होने पर भी पहचाने जाते हैं। उदाहरण के लिए, `.claude` को scan करने पर physical paths
 `settings.json`, `hooks/`, `skills/`, और `agents/` को उनके `.claude/...` equivalents के रूप में
-पहचाना जाता है। किसी अन्य नाम वाली generic root पर यह नियम लागू नहीं होता। Evidence हमेशा पढ़े गए
+पहचाना जाता है; `.devin` scan करने पर `hooks.v1.json`, `config.json` (`hooks` key), `hooks/`, और
+`skills/` भी पहचाने जाते हैं। किसी अन्य नाम वाली generic root पर यह नियम लागू नहीं होता। Evidence हमेशा पढ़े गए
 physical path का उपयोग करता है।
 
 #### HKS-01 · Hooks configuration present and valid JSON — 4 pts {#hks-01}
-`.cursor/hooks.json` या `.claude/settings.json` (`hooks` key) मौजूद है, JSON के रूप में parse होता
-है, और hooks object रखता है। कई configs होने पर valid non-empty config जीतता है; native-root depth,
-event count, और lexical path deterministic tie-breakers हैं।
+`.cursor/hooks.json`, `.claude/settings.json` (`hooks` key), `.devin/hooks.v1.json` (standalone
+event map), या `.devin/config.json` (`hooks` key) मौजूद है और JSON के रूप में parse होता है। कई configs होने पर valid non-empty config जीतता है; native-root depth,
+event count, और lexical path deterministic tie-breakers हैं। Gitignored `.devin/config.local.json` scan नहीं होता।
 **सुधार:** hooks config बनाएँ और
 [अध्याय 5](./guardrails-and-safety#gate-hooks) की recipes से बढ़ाएँ।
 
@@ -522,26 +523,29 @@ events शामिल हैं: `SessionStart`, `Setup`, `InstructionsLoaded`,
 `PostToolUseFailure`, `PostToolBatch`, `PermissionDenied`, `Notification`, `SubagentStart`,
 `SubagentStop`, `TaskCreated`, `TaskCompleted`, `Stop`, `StopFailure`, `TeammateIdle`,
 `ConfigChange`, `CwdChanged`, `DirectoryAdded`, `FileChanged`, `WorktreeCreate`, `WorktreeRemove`,
-`PreCompact`, `PostCompact`, `SessionEnd`, `Elicitation`, और `ElicitationResult`।
+`PreCompact`, `PostCompact`, `SessionEnd`, `Elicitation`, और `ElicitationResult`। Devin का
+standalone map `PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`,
+`PostCompaction`, `SessionStart`, और `SessionEnd` दस्तावेज़ करता है (`version` field आवश्यक नहीं)।
 **Forward compatibility:** कोई unknown लेकिन structurally valid event points बनाए रखता है और
 `unknown-hook-event` warning देता है। Empty या malformed events अभी भी fail होते हैं।
 
 #### HKS-03 · Gate hook guards risky operations — 4 pts {#hks-03}
 gate hook registered (Cursor: `beforeShellExecution`, `beforeMCPExecution`,
-`preToolUse`, या `beforeReadFile`; Claude Code: `PreToolUse`)।
+`preToolUse`, या `beforeReadFile`; Claude Code या Devin: `PreToolUse` या `PermissionRequest`)।
 **सुधार:** अध्याय 5 का destructive-command deny gate जोड़ें — prose rules
 अनुरोध हैं; gates तथ्य हैं।
 
 #### HKS-04 · Feedback hook observes output — 2 pts {#hks-04}
 feedback hook registered (Cursor: `afterFileEdit`, `postToolUse`, …;
-Claude Code: `PostToolUse`)।
+Claude Code: `PostToolUse`; Devin: `PostToolUse` या `Stop`)।
 **सुधार:** edit पर format-and-lint एजेंट को session के अंदर instant feedback देता है।
 
 #### HKS-05 · Hook scripts committed — 2 pts {#hks-05}
 Command executable, shell command, या `args` entry में मिलने वाला हर repository-local path committed
-file पर resolve होता है। `.claude` के scan root होने पर
-`${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js` जैसा project-prefixed canonical path physical
-`hooks/check.js` पर भी resolve होता है। Valid non-command handlers के लिए कोई applicable local
+file पर resolve होता है। `${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js` और
+`${DEVIN_PROJECT_DIR}/.devin/hooks/check.py` जैसे project-prefixed canonical paths native scan roots
+के तहत physical hook paths पर भी resolve होते हैं। Devin commands जो
+`os.path.join(os.environ['DEVIN_PROJECT_DIR'], …)` form उपयोग करते हैं, Python execute किए बिना resolve होते हैं। Valid non-command handlers के लिए कोई applicable local
 script नहीं होता, इसलिए वे pass होते हैं।
 **सुधार:** हर referenced local script commit करें; एक missing path भी HKS-05 को fail करता है।
 

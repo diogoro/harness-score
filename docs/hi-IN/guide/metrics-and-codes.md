@@ -52,7 +52,7 @@ Official level names **maturity** पर लागू, जब तक `gate: effe
 |---|---|---|---|
 | `context` | Context & Guides | 20 | AGENTS.md, scoped rules, README |
 | `skills` | Skills & Commands | 17 | Skills, commands/workflows, subagents |
-| `hooks` | Hooks & Guardrails | 14 | hooks.json / Claude settings hooks |
+| `hooks` | Hooks & Guardrails | 14 | Cursor, Claude Code, और Devin hook configurations |
 | `sensors` | Sensors & Feedback | 20 | Tests, linter, types, formatter |
 | `ci` | CI Feedback | 14 | Pipeline, pre-commit |
 | `hygiene` | Hygiene & Safety | 23 | .gitignore, secrets, lockfile, license, MCP hygiene |
@@ -91,7 +91,7 @@ Stable IDs — remediation से linked [मापन और सुधार](.
 
 | ID | Pts | Analyzes exactly | Remediation |
 |---|---|---|---|
-| HKS-01 | 4 | Hooks config exists और JSON के रूप में parse होता है | [hks-01](./measure-and-improve#hks-01) |
+| HKS-01 | 4 | Cursor, Claude Code, या Devin hooks config exists और JSON के रूप में parse होता है | [hks-01](./measure-and-improve#hks-01) |
 | HKS-02 | 2 | Events और typed handlers structurally valid हैं; unknown valid event warning देता है | [hks-02](./measure-and-improve#hks-02) |
 | HKS-03 | 4 | Gate-class hook registered (shell/MCP/read/tool gate) | [hks-03](./measure-and-improve#hks-03) |
 | HKS-04 | 2 | Feedback-class hook registered (post-edit/tool) | [hks-04](./measure-and-improve#hks-04) |

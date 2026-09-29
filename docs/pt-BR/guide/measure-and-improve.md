@@ -532,14 +532,16 @@ alone; without them the subagent is never invoked.
 Os artefatos do harness são reconhecidos tanto a partir da raiz do repositório, pelo caminho
 canônico, quanto quando o próprio diretório da ferramenta é a raiz do scan. Por exemplo, ao
 escanear `.claude`, os caminhos físicos `settings.json`, `hooks/`, `skills/` e `agents/` são
-reconhecidos como seus equivalentes `.claude/...`. Raízes genéricas com outro nome não recebem
-esse tratamento. A evidência sempre usa o caminho físico que foi lido.
+reconhecidos como seus equivalentes `.claude/...`; ao escanear `.devin`, `hooks.v1.json`,
+`config.json` (chave `hooks`), `hooks/` e `skills/` também são reconhecidos. Raízes genéricas com
+outro nome não recebem esse tratamento. A evidência sempre usa o caminho físico que foi lido.
 
 #### HKS-01 · Hooks configuration present and valid JSON — 4 pts {#hks-01}
-`.cursor/hooks.json` ou `.claude/settings.json` (chave `hooks`) existe, parseia como JSON e contém
-um objeto de hooks. Quando há várias configurações, uma configuração válida e não vazia vence;
-profundidade da raiz nativa, quantidade de eventos e caminho lexical são os desempates
-determinísticos.
+`.cursor/hooks.json`, `.claude/settings.json` (chave `hooks`), `.devin/hooks.v1.json` (mapa
+standalone de eventos) ou `.devin/config.json` (chave `hooks`) existe e parseia como JSON. Quando há
+várias configurações, uma configuração válida e não vazia vence; profundidade da raiz nativa,
+quantidade de eventos e caminho lexical são os desempates determinísticos. `.devin/config.local.json`
+(gitignored) não é escaneado.
 **Correção:** crie a configuração de hooks e evolua a partir das receitas do
 [capítulo 5](./guardrails-and-safety#gate-hooks).
 
@@ -553,27 +555,30 @@ obrigatórios. O catálogo inclui os 31 eventos documentados do Claude Code: `Se
 `PermissionDenied`, `Notification`, `SubagentStart`, `SubagentStop`, `TaskCreated`,
 `TaskCompleted`, `Stop`, `StopFailure`, `TeammateIdle`, `ConfigChange`, `CwdChanged`,
 `DirectoryAdded`, `FileChanged`, `WorktreeCreate`, `WorktreeRemove`, `PreCompact`, `PostCompact`,
-`SessionEnd`, `Elicitation` e `ElicitationResult`.
+`SessionEnd`, `Elicitation` e `ElicitationResult`. O mapa standalone do Devin documenta
+`PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`,
+`SessionStart` e `SessionEnd` (sem campo `version`).
 **Compatibilidade futura:** um evento desconhecido, mas estruturalmente válido, preserva os pontos
 e emite o warning `unknown-hook-event`. Eventos vazios ou malformados continuam reprovando.
 
 #### HKS-03 · Gate hook guards risky operations — 4 pts {#hks-03}
 A gate hook registered (Cursor: `beforeShellExecution`, `beforeMCPExecution`,
-`preToolUse`, or `beforeReadFile`; Claude Code: `PreToolUse`).
+`preToolUse`, or `beforeReadFile`; Claude Code ou Devin: `PreToolUse` ou `PermissionRequest`).
 **Correção:** gate de deny de comandos destrutivos do capítulo 5 — rules em prosa são
 pedidos; gates são fatos.
 
 #### HKS-04 · Feedback hook observes output — 2 pts {#hks-04}
 A feedback hook registered (Cursor: `afterFileEdit`, `postToolUse`, …;
-Claude Code: `PostToolUse`).
+Claude Code: `PostToolUse`; Devin: `PostToolUse` ou `Stop`).
 **Correção:** format-and-lint on edit gives the agent instant feedback inside the
 session.
 
 #### HKS-05 · Hook scripts committed — 2 pts {#hks-05}
 Todo caminho local do repositório encontrado no executável, no comando de shell ou em uma entrada
 de `args` resolve para um arquivo commitado. Caminhos canônicos prefixados pelo projeto, como
-`${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js`, também resolvem para o caminho físico
-`hooks/check.js` quando `.claude` é a raiz do scan. Handlers válidos que não executam comandos
+`${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js` e `${DEVIN_PROJECT_DIR}/.devin/hooks/check.py`
+também resolvem para caminhos físicos de hooks sob raízes nativas de scan. Comandos Devin na forma
+`os.path.join(os.environ['DEVIN_PROJECT_DIR'], …)` são resolvidos sem executar Python. Handlers válidos que não executam comandos
 passam sem scripts locais aplicáveis.
 **Correção:** commite todo script local referenciado; um único caminho ausente reprova o HKS-05.
 

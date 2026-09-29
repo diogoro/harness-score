@@ -1,6 +1,6 @@
 # Multi-Harness Support
 
-Starting from **v0.4.0**, Harness Score measures the maturity of your AI coding harness across **any tool** — not just Cursor. Whether you're using Cursor, Claude Code, Windsurf, Cline, Continue, Codex, or any other AI-first IDE or editor, the same 108-point scoring model applies.
+Starting from **v0.4.0**, Harness Score measures the maturity of your AI coding harness across **any tool** — not just Cursor. Whether you're using Cursor, Claude Code, Devin, Windsurf, Cline, Continue, Codex, or any other AI-first IDE or editor, the same 108-point scoring model applies.
 
 ## Why multi-harness support matters
 
@@ -13,8 +13,8 @@ Harness Score makes this explicit: you measure once, any tool benefits. You don'
 The scanner uses **OR semantics** for tool-specific artifacts. Each check asks "does *any* recognized tool provide this?" — not "does Cursor provide this?". For example:
 
 - `.cursor/rules/*.mdc` **or** `.windsurf/rules/*.md` **or** `.clinerules/*.md` **or** a nested `CLAUDE.md` → counts toward **rules**
-- `.cursor/hooks.json` **or** a `.claude/settings.json` with a `hooks` section → counts toward **hooks**
-- `.cursor/skills/<name>/SKILL.md` **or** `.claude/skills/<name>/SKILL.md` → counts toward **skills**
+- `.cursor/hooks.json` **or** a `.claude/settings.json` with a `hooks` section **or** `.devin/hooks.v1.json` **or** a `.devin/config.json` with a `hooks` section → counts toward **hooks**
+- `.cursor/skills/<name>/SKILL.md` **or** `.claude/skills/<name>/SKILL.md` **or** `.devin/skills/<name>/SKILL.md` → counts toward **skills**
 - `.cursor/agents/*.md` **or** `.claude/agents/*.md` **or** `.opencode/agents/*.md` → counts toward **subagents**
 - A root `AGENTS.md` **or** `CLAUDE.md` **or** `GEMINI.md` → counts toward **context guides**
 
@@ -29,6 +29,7 @@ harness registry — [`registry.ts`](https://github.com/paladini/harness-score/b
 |---|---|---|---|---|---|---|
 | **Cursor** | `.cursor/rules/*.mdc` | `.cursor/skills/*/SKILL.md` | `.cursor/commands/*.md` | `.cursor/agents/*.md` | `.cursor/hooks.json` | `.cursor/mcp.json` |
 | **Claude Code** | nested `CLAUDE.md` files | `.claude/skills/*/SKILL.md` | `.claude/commands/*.md` | `.claude/agents/*.md` | `.claude/settings.json` (`hooks` key) | `.mcp.json` |
+| **Devin** | — | `.devin/skills/*/SKILL.md` | — | — | `.devin/hooks.v1.json` (standalone event map) or `.devin/config.json` (`hooks` key) | — |
 | **Windsurf** | `.windsurf/rules/*.md` | — | `.windsurf/workflows/*.md` | — | — | — |
 | **Cline** | `.clinerules/*.md` | — | — | — | — | — |
 | **Continue** | `.continue/rules/*.md` | — | `.continue/prompts/*` | — | — | — |
@@ -61,7 +62,7 @@ Root context files (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`) count for every tool.
 And the most important artifacts are **tool-agnostic** anyway: tests, CI pipelines, linters, type checkers, `.gitignore`, lockfiles, and `SECURITY.md` score the same no matter which tool you use.
 
 ::: tip A tool's column being sparse is not a penalty
-Windsurf has no hooks system for the scanner to recognize — but hooks are only one dimension of six. A Windsurf-only repository with strong rules, sensors, and CI still climbs to L3. L4 requires gate hooks, which today means a `.cursor/hooks.json` or a Claude Code `settings.json` alongside your primary tool.
+Windsurf has no hooks system for the scanner to recognize — but hooks are only one dimension of six. A Windsurf-only repository with strong rules, sensors, and CI still climbs to L3. L4 requires gate hooks, which today means `.cursor/hooks.json`, Claude Code `settings.json`, or Devin `.devin/hooks.v1.json` / `.devin/config.json` alongside your primary tool.
 :::
 
 ## Building your harness once
@@ -226,7 +227,7 @@ If you switch primary tools (e.g., Cursor → Claude Code), the harness transfer
 
 - Plugin support is staggered: **Cursor** (flagship, full audit-and-fix), **Claude Code** (Phase 0, read-only audit), others TBD (see [PLUGINS-ROADMAP.md](https://github.com/paladini/harness-score/blob/main/PLUGINS-ROADMAP.md)).
 - The CLI is tool-aware and fully multi-harness: the terminal and markdown reports show a `Detected:` line naming every recognized tool, and `--json` output includes the same list as a `detectedHarnesses` array. Plugins catch up over time.
-- Hooks are recognized for Cursor and Claude Code only — other tools' hook systems (as they emerge) need registry entries.
+- Hooks are recognized for Cursor, Claude Code, and Devin — other tools' hook systems (as they emerge) need registry entries. Devin is **detection-only** in the CLI (no plugin yet); the scanner reads repository `.devin/` paths only — not gitignored `.devin/config.local.json` or user-home Devin settings.
 
 **Planned (post-1.0):**
 

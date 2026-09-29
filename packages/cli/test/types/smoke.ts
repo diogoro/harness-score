@@ -74,8 +74,9 @@ const complete: boolean = reportScopeIsComplete(scored, 'maturity');
 const formattedReason: string = formatIncompleteReason(incompleteReason);
 const checkDelta: CheckDelta | undefined = diff.checksChanged[0];
 const dimensionDelta: DimensionDelta = diff.dimensions[0]!;
-const toolId: ToolId = 'cursor';
-const toolName: string = toolDisplayName(scored.detectedHarnesses[0] ?? 'cursor');
+const toolId: ToolId = 'devin';
+const toolName: string = toolDisplayName(toolId);
+const devinDisplayName: string = TOOL_DISPLAY_NAMES.devin;
 const severity: Severity = scored.checks[0]!.severity;
 const severities = resolveSeverities({ extends: [], rules: {} });
 const presets = PRESET_REGISTRY;
@@ -109,6 +110,7 @@ void [
   dimensionDelta,
   toolId,
   toolName,
+  devinDisplayName,
   severity,
   severities,
   presets,

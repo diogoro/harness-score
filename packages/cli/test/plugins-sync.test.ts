@@ -137,6 +137,7 @@ describe('plugins/shared path config sync', () => {
       expect(tool.mcpConfigPath).toBe(paths.mcpConfigPath);
     }
     expect(Object.keys(TOOL_PATHS).sort()).toEqual(Object.keys(PLUGIN_TOOL_PATHS).sort());
+    expect(PLUGIN_TOOL_PATHS).not.toHaveProperty('devin');
   });
 
   test('every shipped plugin in TOOLS derives its paths from TOOL_PATHS', () => {

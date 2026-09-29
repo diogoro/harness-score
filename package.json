@@ -13,6 +13,7 @@
     "test:release": "node --test scripts/release.test.mjs",
     "test:coverage": "npm run test:coverage -w harness-score",
     "scan": "node packages/cli/dist/cli.js .",
+    "devin:verify": "node scripts/devin-harness-verify.mjs",
     "plugins:sync": "node plugins/shared/generate-tools.mjs",
     "plugins:generate": "node plugins/shared/generate.mjs",
     "plugins:sync-check": "npm run build && node plugins/shared/generate-tools.mjs --check && node plugins/shared/generate.mjs --check",

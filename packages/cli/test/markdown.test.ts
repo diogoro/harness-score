@@ -145,8 +145,8 @@ describe('renderMarkdown', () => {
   });
 
   test('shows detected harnesses with display names, only when non-empty', () => {
-    const detected = renderMarkdown(makeReport({ detectedHarnesses: ['cursor', 'claude-code'] }));
-    expect(detected).toContain('**Detected harnesses:** Cursor, Claude Code');
+    const detected = renderMarkdown(makeReport({ detectedHarnesses: ['cursor', 'claude-code', 'devin'] }));
+    expect(detected).toContain('**Detected harnesses:** Cursor, Claude Code, Devin');
 
     expect(renderMarkdown(makeReport({ detectedHarnesses: [] }))).not.toContain('Detected harnesses');
   });

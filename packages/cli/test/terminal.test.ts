@@ -151,8 +151,8 @@ describe('renderTerminal', () => {
   });
 
   test('shows detected harnesses with display names, only when non-empty', () => {
-    const detected = makeReport({ detectedHarnesses: ['cursor', 'claude-code'] });
-    expect(renderTerminal(detected)).toContain('Detected: Cursor, Claude Code');
+    const detected = makeReport({ detectedHarnesses: ['cursor', 'claude-code', 'devin'] });
+    expect(renderTerminal(detected)).toContain('Detected: Cursor, Claude Code, Devin');
 
     expect(renderTerminal(makeReport({ detectedHarnesses: [] }))).not.toContain('Detected:');
   });

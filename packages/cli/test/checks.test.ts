@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { ALL_CHECKS } from '../src/checks/index.js';
+import { readNormalizedHooks } from '../src/harness/hooks.js';
 import { check, fakeContext } from './helpers.js';
 
 describe('context checks', () => {
@@ -122,6 +123,25 @@ describe('skills checks', () => {
     expect((await check('SKL-01')).run(ctx).passed).toBe(true);
   });
 
+  test('Devin skills pass SKL-01/02/04 without counting as SKL-03 commands', async () => {
+    const ctx = fakeContext({
+      '.devin/skills/review/SKILL.md':
+        '---\nname: review\ndescription: Use when reviewing changes with deterministic project checks.\n---\nbody',
+    });
+    const outcomes = await Promise.all(
+      ['SKL-01', 'SKL-02', 'SKL-03', 'SKL-04'].map(async (id) => (await check(id)).run(ctx)),
+    );
+    expect(outcomes.map((outcome) => outcome.passed)).toEqual([true, true, false, true]);
+    expect(outcomes[0]?.evidence).toContain('(devin)');
+  });
+
+  test('Devin skills without frontmatter still fail metadata checks', async () => {
+    const ctx = fakeContext({ '.devin/skills/review/SKILL.md': '# Review\nNo frontmatter.' });
+    expect((await check('SKL-01')).run(ctx).passed).toBe(true);
+    expect((await check('SKL-02')).run(ctx).passed).toBe(false);
+    expect((await check('SKL-04')).run(ctx).passed).toBe(false);
+  });
+
   test('SKL-02 fails when a skill is missing name/description frontmatter', async () => {
     const ctx = fakeContext({ '.cursor/skills/deploy/SKILL.md': '# Deploy\nNo frontmatter.' });
     expect((await check('SKL-02')).run(ctx).passed).toBe(false);
@@ -167,6 +187,123 @@ describe('skills checks', () => {
 });
 
 describe('hook checks', () => {
+  const devinCommand = (command = 'echo ok') => [{ hooks: [{ type: 'command', command }] }];
+  const devinPythonCommand = (script: string) =>
+    `python -c "import os, runpy; runpy.run_path(os.path.join(os.environ['DEVIN_PROJECT_DIR'], '.devin', 'hooks', '${script}'), run_name='__main__')"`;
+
+  test('HKS-01 and HKS-02 accept standalone Devin events without a wrapper or version', async () => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({ PreToolUse: devinCommand() }),
+    });
+    expect((await check('HKS-01')).run(ctx).passed).toBe(true);
+    expect((await check('HKS-02')).run(ctx).passed).toBe(true);
+    expect(readNormalizedHooks(ctx)?.versionRequirement).toBe('not-required');
+  });
+
+  test('HKS-01 accepts Devin hooks nested under .devin/config.json', async () => {
+    const ctxWithoutHooks = fakeContext({
+      '.devin/config.json': JSON.stringify({ model: 'default' }),
+    });
+    expect((await check('HKS-01')).run(ctxWithoutHooks).passed).toBe(false);
+    const ctxWithHooks = fakeContext({
+      '.devin/config.json': JSON.stringify({ hooks: { PreToolUse: devinCommand() } }),
+    });
+    expect((await check('HKS-01')).run(ctxWithHooks).passed).toBe(true);
+    expect(readNormalizedHooks(ctxWithHooks)?.source).toBe('.devin/config.json');
+  });
+
+  test('HKS-01 preserves Devin ownership and version policy for invalid JSON', async () => {
+    const ctx = fakeContext({ '.devin/hooks.v1.json': '{ not json' });
+    const normalized = readNormalizedHooks(ctx);
+    expect(normalized?.toolId).toBe('devin');
+    expect(normalized?.versionRequirement).toBe('not-required');
+    expect(normalized?.structuralErrors).toEqual(['Hook configuration is not valid JSON.']);
+    expect((await check('HKS-01')).run(ctx).passed).toBe(false);
+  });
+
+  test('HKS-01 treats a valid non-object Devin root as a structural error', async () => {
+    const ctx = fakeContext({ '.devin/hooks.v1.json': 'null' });
+    const normalized = readNormalizedHooks(ctx);
+    expect(normalized?.versionRequirement).toBe('not-required');
+    expect(normalized?.structuralErrors).toEqual(['The root value must be an event map object.']);
+    expect((await check('HKS-01')).run(ctx).passed).toBe(false);
+  });
+
+  test('HKS-02 accepts every documented Devin event without warnings', async () => {
+    const events = [
+      'PreToolUse',
+      'PostToolUse',
+      'PermissionRequest',
+      'UserPromptSubmit',
+      'Stop',
+      'PostCompaction',
+      'SessionStart',
+      'SessionEnd',
+    ];
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify(
+        Object.fromEntries(events.map((event) => [event, devinCommand()])),
+      ),
+    });
+    const outcome = (await check('HKS-02')).run(ctx);
+    expect(outcome.passed).toBe(true);
+    expect(outcome.warnings).toEqual([]);
+  });
+
+  test('HKS-02 preserves points for a structurally valid future Devin event and emits a warning', async () => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({ FutureLifecycleEvent: devinCommand() }),
+    });
+    const outcome = (await check('HKS-02')).run(ctx);
+    expect(outcome.passed).toBe(true);
+    expect(outcome.evidence).toContain('FutureLifecycleEvent');
+    expect(outcome.warnings).toEqual([
+      expect.objectContaining({ code: 'unknown-hook-event', source: '.devin/hooks.v1.json' }),
+    ]);
+  });
+
+  test.each([
+    ['empty matcher groups', { PreToolUse: [] }],
+    ['non-object matcher groups', { PreToolUse: [null] }],
+    ['empty hooks arrays', { PreToolUse: [{ hooks: [] }] }],
+    ['non-object handlers', { PreToolUse: [{ hooks: [null] }] }],
+    ['handlers without a type', { PreToolUse: [{ hooks: [{ command: 'echo invalid' }] }] }],
+    ['unknown handler types', { PreToolUse: [{ hooks: [{ type: 'http', url: 'https://example.test' }] }] }],
+    ['command handlers without command', { PreToolUse: [{ hooks: [{ type: 'command' }] }] }],
+    ['prompt handlers without prompt', { PreToolUse: [{ hooks: [{ type: 'prompt' }] }] }],
+  ])('HKS-02 rejects Devin %s', async (_label, hooks) => {
+    const ctx = fakeContext({ '.devin/hooks.v1.json': JSON.stringify(hooks) });
+    expect((await check('HKS-02')).run(ctx).passed).toBe(false);
+  });
+
+  test('HKS-02 accepts documented optional Devin matcher and timeout fields', async () => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({
+        PreToolUse: [
+          {
+            matcher: '^exec$',
+            hooks: [
+              { type: 'command', command: 'echo ok', timeout: 5 },
+              { type: 'prompt', prompt: 'Review this operation.', timeout: 10 },
+            ],
+          },
+        ],
+      }),
+    });
+    expect((await check('HKS-02')).run(ctx).passed).toBe(true);
+  });
+
+  test('HKS-05 does not invent a script path for a Devin prompt handler', async () => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({
+        UserPromptSubmit: [{ hooks: [{ type: 'prompt', prompt: 'Review the prompt.' }] }],
+      }),
+    });
+    const outcome = (await check('HKS-05')).run(ctx);
+    expect(outcome.passed).toBe(true);
+    expect(outcome.evidence).toContain('no repository scripts');
+  });
+
   test('HKS-01 fails on invalid JSON', async () => {
     const ctx = fakeContext({ '.cursor/hooks.json': '{ not json' });
     const outcome = (await check('HKS-01')).run(ctx);
@@ -273,6 +410,81 @@ describe('hook checks', () => {
       }),
     });
     expect((await check('HKS-05')).run(ctx).passed).toBe(true);
+  });
+
+  test.each([
+    '${DEVIN_PROJECT_DIR}/.devin/hooks/guard.py',
+    '$DEVIN_PROJECT_DIR/.devin/hooks/guard.py',
+    '$DEVIN_PROJECT_DIR\\.devin\\hooks\\guard.py',
+  ])('HKS-05 resolves a Devin project path when the script exists: %s', async (command) => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({ PreToolUse: devinCommand(command) }),
+      '.devin/hooks/guard.py': '# present',
+    });
+    expect((await check('HKS-05')).run(ctx).passed).toBe(true);
+  });
+
+  test('HKS-05 resolves canonical Devin os.path.join commands without executing Python', async () => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({
+        PreToolUse: devinCommand(devinPythonCommand('guard.py')),
+      }),
+      '.devin/hooks/guard.py': '# present',
+    });
+    const outcome = (await check('HKS-05')).run(ctx);
+    expect(outcome.passed).toBe(true);
+    expect(outcome.evidence).toContain('1 repository path reference');
+  });
+
+  test('HKS-05 fails when a canonical Devin os.path.join script is absent', async () => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({
+        PreToolUse: devinCommand(devinPythonCommand('missing.py')),
+      }),
+    });
+    const outcome = (await check('HKS-05')).run(ctx);
+    expect(outcome.passed).toBe(false);
+    expect(outcome.evidence).toContain('.devin/hooks/missing.py');
+  });
+
+  test('HKS-05 ignores lookalike Devin os.path.join identifiers', async () => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({
+        PreToolUse: devinCommand(
+          `python -c "not_os.path.join(os.environ['DEVIN_PROJECT_DIR'], '.devin', 'hooks', 'missing.py')"`,
+        ),
+      }),
+    });
+    const outcome = (await check('HKS-05')).run(ctx);
+    expect(outcome.passed).toBe(true);
+    expect(outcome.evidence).toContain('nothing to resolve');
+  });
+
+  test.each(['PreToolUse', 'PermissionRequest'])('HKS-03 treats Devin %s as a gate', async (event) => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({ [event]: devinCommand() }),
+    });
+    expect((await check('HKS-03')).run(ctx).passed).toBe(true);
+  });
+
+  test.each(['PostToolUse', 'Stop'])('HKS-04 treats Devin %s as feedback', async (event) => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({ [event]: devinCommand() }),
+    });
+    expect((await check('HKS-04')).run(ctx).passed).toBe(true);
+  });
+
+  test.each([
+    'PostCompaction',
+    'UserPromptSubmit',
+    'SessionStart',
+    'SessionEnd',
+  ])('does not treat Devin %s as a gate or feedback event', async (event) => {
+    const ctx = fakeContext({
+      '.devin/hooks.v1.json': JSON.stringify({ [event]: devinCommand() }),
+    });
+    expect((await check('HKS-03')).run(ctx).passed).toBe(false);
+    expect((await check('HKS-04')).run(ctx).passed).toBe(false);
   });
 
   test('HKS-03 fails with no gate hook registered', async () => {

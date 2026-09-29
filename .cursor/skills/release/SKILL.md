@@ -5,6 +5,11 @@ description: Use when the user asks to release, publish, or version-bump harness
 
 # Releasing harness-score
 
+Release artifacts are **English** unless the user explicitly requests another
+language: changeset bodies, `CHANGELOG.md` entries, and GitHub release notes.
+Credit contributors with explicit `@handle` lines in the changeset when they
+are not the merge author.
+
 1. Confirm every user-facing change has a changeset with an English summary
    and explicit contributor credit when applicable. Commit metadata alone is
    not sufficient attribution.

@@ -532,14 +532,15 @@ alone; without them the subagent is never invoked.
 Los artefactos del harness se reconocen tanto desde la raíz del repositorio por su ruta canónica
 como cuando el propio directorio de la herramienta es la raíz del scan. Por ejemplo, al escanear
 `.claude`, las rutas físicas `settings.json`, `hooks/`, `skills/` y `agents/` se reconocen como
-sus equivalentes `.claude/...`. Las raíces genéricas con otro nombre no reciben este tratamiento.
+sus equivalentes `.claude/...`; al escanear `.devin`, también se reconocen `hooks.v1.json`,
+`config.json` (clave `hooks`), `hooks/` y `skills/`. Las raíces genéricas con otro nombre no reciben este tratamiento.
 La evidencia siempre usa la ruta física que se leyó.
 
 #### HKS-01 · Hooks configuration present and valid JSON — 4 pts {#hks-01}
-`.cursor/hooks.json` o `.claude/settings.json` (clave `hooks`) existe, se parsea como JSON y
-contiene un objeto de hooks. Cuando existen varias configuraciones, gana una válida y no vacía;
-la profundidad de la raíz nativa, la cantidad de eventos y la ruta léxica son los desempates
-deterministas.
+`.cursor/hooks.json`, `.claude/settings.json` (clave `hooks`), `.devin/hooks.v1.json` (mapa
+standalone de eventos) o `.devin/config.json` (clave `hooks`) existe y se parsea como JSON. Cuando existen varias configuraciones,
+gana una válida y no vacía; la profundidad de la raíz nativa, la cantidad de eventos y la ruta léxica son los desempates
+deterministas. `.devin/config.local.json` (gitignored) no se escanea.
 **Corrección:** crea la configuración de hooks y amplíala con las recetas del
 [capítulo 5](./guardrails-and-safety#gate-hooks).
 
@@ -553,27 +554,30 @@ obligatorios. El catálogo incluye los 31 eventos documentados de Claude Code: `
 `PermissionDenied`, `Notification`, `SubagentStart`, `SubagentStop`, `TaskCreated`,
 `TaskCompleted`, `Stop`, `StopFailure`, `TeammateIdle`, `ConfigChange`, `CwdChanged`,
 `DirectoryAdded`, `FileChanged`, `WorktreeCreate`, `WorktreeRemove`, `PreCompact`, `PostCompact`,
-`SessionEnd`, `Elicitation` y `ElicitationResult`.
+`SessionEnd`, `Elicitation` y `ElicitationResult`. El mapa standalone de Devin documenta
+`PreToolUse`, `PostToolUse`, `PermissionRequest`, `UserPromptSubmit`, `Stop`, `PostCompaction`,
+`SessionStart` y `SessionEnd` (no requiere campo `version`).
 **Compatibilidad futura:** un evento desconocido pero estructuralmente válido conserva los puntos
 y emite el warning `unknown-hook-event`. Los eventos vacíos o mal formados siguen reprobando.
 
 #### HKS-03 · Gate hook guards risky operations — 4 pts {#hks-03}
 A gate hook registered (Cursor: `beforeShellExecution`, `beforeMCPExecution`,
-`preToolUse`, or `beforeReadFile`; Claude Code: `PreToolUse`).
+`preToolUse`, or `beforeReadFile`; Claude Code o Devin: `PreToolUse` o `PermissionRequest`).
 **Corrección:** gate de deny de comandos destructivos del capítulo 5 — rules en prosa son
 pedidos; gates son hechos.
 
 #### HKS-04 · Feedback hook observes output — 2 pts {#hks-04}
 A feedback hook registered (Cursor: `afterFileEdit`, `postToolUse`, …;
-Claude Code: `PostToolUse`).
+Claude Code: `PostToolUse`; Devin: `PostToolUse` o `Stop`).
 **Corrección:** format-and-lint on edit gives the agent instant feedback inside the
 session.
 
 #### HKS-05 · Hook scripts committed — 2 pts {#hks-05}
 Cada ruta local del repositorio encontrada en el ejecutable, el comando de shell o una entrada de
 `args` resuelve a un archivo confirmado en el repositorio. Las rutas canónicas con prefijo del
-proyecto, como `${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js`, también resuelven a la ruta física
-`hooks/check.js` cuando `.claude` es la raíz del scan. Los handlers válidos que no ejecutan
+proyecto, como `${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js` y `${DEVIN_PROJECT_DIR}/.devin/hooks/check.py`,
+también resuelven a rutas físicas de hooks bajo raíces nativas de scan. Los comandos Devin con la forma
+`os.path.join(os.environ['DEVIN_PROJECT_DIR'], …)` se resuelven sin ejecutar Python. Los handlers válidos que no ejecutan
 comandos pasan sin scripts locales aplicables.
 **Corrección:** confirma cada script local referenciado; una sola ruta ausente reprueba HKS-05.
 

@@ -493,13 +493,14 @@ description ≥40 字符。
 
 Harness 工件既可从仓库根目录按规范路径识别，也可在工具目录本身作为扫描根目录时识别。
 例如，扫描 `.claude` 时，物理路径 `settings.json`、`hooks/`、`skills/` 和 `agents/`
-会被识别为对应的 `.claude/...` 路径。其他名称的通用根目录不会应用此规则。证据始终使用
+会被识别为对应的 `.claude/...` 路径；扫描 `.devin` 时，同样识别 `hooks.v1.json`、
+`config.json`（`hooks` 键）、`hooks/` 和 `skills/`。其他名称的通用根目录不会应用此规则。证据始终使用
 实际读取的物理路径。
 
 #### HKS-01 · Hooks configuration present and valid JSON — 4 pts {#hks-01}
-`.cursor/hooks.json` 或 `.claude/settings.json`（`hooks` 键）存在、可解析为 JSON，且包含
-hooks 对象。当存在多个配置时，优先选择有效且非空的配置；再依次按原生根目录深度、事件数量
-和路径字典序进行确定性选择。
+`.cursor/hooks.json`、`.claude/settings.json`（`hooks` 键）、`.devin/hooks.v1.json`（独立
+event 映射）或 `.devin/config.json`（`hooks` 键）存在且可解析为 JSON。当存在多个配置时，优先选择有效且非空的配置；再依次按原生根目录深度、事件数量
+和路径字典序进行确定性选择。gitignore 的 `.devin/config.local.json` 不会被扫描。
 **修复：** 创建 hooks 配置，并按
 [第 5 章](./guardrails-and-safety#gate-hooks) 的方案逐步扩展。
 
@@ -512,25 +513,28 @@ hooks 对象。当存在多个配置时，优先选择有效且非空的配置�
 `PostToolBatch`、`PermissionDenied`、`Notification`、`SubagentStart`、`SubagentStop`、
 `TaskCreated`、`TaskCompleted`、`Stop`、`StopFailure`、`TeammateIdle`、`ConfigChange`、
 `CwdChanged`、`DirectoryAdded`、`FileChanged`、`WorktreeCreate`、`WorktreeRemove`、
-`PreCompact`、`PostCompact`、`SessionEnd`、`Elicitation` 和 `ElicitationResult`。
+`PreCompact`、`PostCompact`、`SessionEnd`、`Elicitation` 和 `ElicitationResult`。Devin 的
+独立映射文档列出 `PreToolUse`、`PostToolUse`、`PermissionRequest`、`UserPromptSubmit`、
+`Stop`、`PostCompaction`、`SessionStart` 和 `SessionEnd`（无需 `version` 字段）。
 **向前兼容：** 未知但结构有效的事件保留分数，并产生 `unknown-hook-event` warning。
 空事件或结构错误的事件仍会失败。
 
 #### HKS-03 · Gate hook guards risky operations — 4 pts {#hks-03}
 已注册 gate hook（Cursor：`beforeShellExecution`、`beforeMCPExecution`、
-`preToolUse` 或 `beforeReadFile`；Claude Code：`PreToolUse`）。
+`preToolUse` 或 `beforeReadFile`；Claude Code 或 Devin：`PreToolUse` 或 `PermissionRequest`）。
 **修复：** 添加第 5 章的 destructive-command deny gate — 文字 rules 是请求；gate 是事实。
 
 #### HKS-04 · Feedback hook observes output — 2 pts {#hks-04}
 已注册 feedback hook（Cursor：`afterFileEdit`、`postToolUse` 等；
-Claude Code：`PostToolUse`）。
+Claude Code：`PostToolUse`；Devin：`PostToolUse` 或 `Stop`）。
 **修复：** 编辑时 format-and-lint，让智能体在会话内获得即时反馈。
 
 #### HKS-05 · Hook scripts committed — 2 pts {#hks-05}
 命令可执行文件、shell 命令或 `args` 条目中出现的每个仓库本地路径都必须解析到已提交文件。
-当 `.claude` 是扫描根目录时，`${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js` 等带项目
-前缀的规范路径也会解析到物理路径 `hooks/check.js`。不执行命令的有效 handler 没有适用的
-本地脚本，因此可以通过。
+`${CLAUDE_PROJECT_DIR}/.claude/hooks/check.js` 与 `${DEVIN_PROJECT_DIR}/.devin/hooks/check.py`
+等项目前缀规范路径也会解析到原生根目录下的物理 hook 路径。Devin 使用
+`os.path.join(os.environ['DEVIN_PROJECT_DIR'], …)` 形式的命令会在不执行 Python 的情况下解析。
+不执行命令的有效 handler 没有适用的本地脚本，因此可以通过。
 **修复：** 提交所有引用的本地脚本；任何一个缺失路径都会使 HKS-05 失败。
 
 ### Sensors & Feedback (20 pts)

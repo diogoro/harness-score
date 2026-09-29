@@ -63,6 +63,16 @@ Project-local agent skill:
   change, not a drive-by tweak.
 - User-facing changes get a changeset (`npm run changeset` at the repo
   root) in the same PR — see `RELEASING.md`.
+- **Public GitHub communication is English.** PR and issue comments, review
+  bodies, and maintainer replies on this repository must be written in English,
+  even when a contributor wrote in another language. (You may use another
+  language in private chat elsewhere.) Changesets and release-note text are
+  English unless a maintainer explicitly requests otherwise — see
+  `RELEASING.md` and `CONTRIBUTING.md`.
+- **Fix external PRs on the contributor's branch.** When finishing or
+  correcting someone else's open PR, commit and push to **that PR's head
+  branch** (usually on their fork). Do not land the work on local `main`
+  ahead of `origin/main`; merge through GitHub after review.
 
 ## Do not touch
 

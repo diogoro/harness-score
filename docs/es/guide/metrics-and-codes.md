@@ -52,7 +52,7 @@ Narrativa completa: [El modelo de madurez](./maturity-model).
 |---|---|---|---|
 | `context` | Context & Guides | 20 | AGENTS.md, rules con scope, README |
 | `skills` | Skills & Commands | 17 | Skills, commands/workflows, subagents |
-| `hooks` | Hooks & Guardrails | 14 | hooks.json / hooks en settings de Claude |
+| `hooks` | Hooks & Guardrails | 14 | Configuraciones de hooks de Cursor, Claude Code y Devin |
 | `sensors` | Sensors & Feedback | 20 | Tests, linter, tipos, formatter |
 | `ci` | CI Feedback | 14 | Pipeline, pre-commit |
 | `hygiene` | Hygiene & Safety | 23 | .gitignore, secretos, lockfile, licencia, higiene MCP |
@@ -91,7 +91,7 @@ IDs estables — vinculados a remediación en [Medir y mejorar](./measure-and-im
 
 | ID | Pts | Analiza exactamente | Remediación |
 |---|---|---|---|
-| HKS-01 | 4 | La config de hooks existe y parsea como JSON | [hks-01](./measure-and-improve#hks-01) |
+| HKS-01 | 4 | Existe una config de hooks de Cursor, Claude Code o Devin y parsea como JSON | [hks-01](./measure-and-improve#hks-01) |
 | HKS-02 | 2 | Eventos y handlers tipados son estructuralmente válidos; un evento válido desconocido avisa | [hks-02](./measure-and-improve#hks-02) |
 | HKS-03 | 4 | Hook clase gate registrado (shell/MCP/read/tool gate) | [hks-03](./measure-and-improve#hks-03) |
 | HKS-04 | 2 | Hook clase feedback registrado (post-edit/tool) | [hks-04](./measure-and-improve#hks-04) |

@@ -52,7 +52,7 @@ Full narrative: [The Maturity Model](./maturity-model).
 |---|---|---|---|
 | `context` | Context & Guides | 20 | AGENTS.md, scoped rules, README |
 | `skills` | Skills & Commands | 17 | Skills, commands/workflows, subagents |
-| `hooks` | Hooks & Guardrails | 14 | hooks.json / Claude settings hooks |
+| `hooks` | Hooks & Guardrails | 14 | Cursor, Claude Code, and Devin hook configurations |
 | `sensors` | Sensors & Feedback | 20 | Tests, linter, types, formatter |
 | `ci` | CI Feedback | 14 | Pipeline, pre-commit |
 | `hygiene` | Hygiene & Safety | 23 | .gitignore, secrets, lockfile, license, MCP hygiene |
@@ -91,7 +91,7 @@ Stable IDs — linked to remediation in [Measure & Improve](./measure-and-improv
 
 | ID | Pts | Analyzes exactly | Remediation |
 |---|---|---|---|
-| HKS-01 | 4 | Hooks config exists and parses as JSON | [hks-01](./measure-and-improve#hks-01) |
+| HKS-01 | 4 | A Cursor, Claude Code, or Devin hooks config exists and parses as JSON | [hks-01](./measure-and-improve#hks-01) |
 | HKS-02 | 2 | Hook events and typed handlers are structurally valid; unknown valid events warn | [hks-02](./measure-and-improve#hks-02) |
 | HKS-03 | 4 | A gate-class hook is registered (shell/MCP/read/tool gate) | [hks-03](./measure-and-improve#hks-03) |
 | HKS-04 | 2 | A feedback-class hook is registered (post-edit/tool) | [hks-04](./measure-and-improve#hks-04) |
